@@ -1,4 +1,4 @@
-const RequestBooking = require("../../models/RequestBooking");
+const RequestBooking = require("../../models/RequestBooking"); 
 const Wallet = require('../../models/Wallet');
 const CurrentHolding = require('../../models/CurrentHolding');
 const Ride = require('../../models/RideOffer');  // Import Ride model
@@ -16,12 +16,16 @@ const createBookingRequest = async (req, res) => {
             userProfile,
             offerRide,
             paymentAmount,
-            noOfSeatsBooked
+            noOfSeatsBooked,
+            startTime,          // New field
+            endTime,            // New field
+                        // New field
         } = req.body;
-
+        const user = await Profile.findById(userProfile);
+        console.log(user)
         // Find the user's wallet based on their profile ID
-        const wallet = await Wallet.findOne({ userId: userProfile });
-        const user=await Profile.findById(userProfile)
+        const wallet = await Wallet.findOne({ userId: user.userId });
+      
 
         // Check if the wallet exists and has enough balance
         if (!wallet) {
@@ -34,11 +38,10 @@ const createBookingRequest = async (req, res) => {
 
         // Deduct the payment amount from the wallet's balance
         wallet.balance -= paymentAmount;
-      
 
         // Find the existing CurrentHolding record
         const currentHolding = await CurrentHolding.findOne();
- 
+
         // Check if CurrentHolding exists
         if (!currentHolding) {
             return res.status(404).json({ message: 'Current holding not found' });
@@ -47,7 +50,7 @@ const createBookingRequest = async (req, res) => {
         // Update the CurrentHolding amount
         currentHolding.Amount += paymentAmount;
         await currentHolding.save();
- 
+
         // Create a new RequestBooking instance
         const newBookingRequest = new RequestBooking({
             pickupName,
@@ -58,9 +61,12 @@ const createBookingRequest = async (req, res) => {
             offerRide,
             paymentAmount,
             noOfSeatsBooked,
+            startTime,           // Add startTime
+            endTime,             // Add endTime
             paymentStatus: 'completed',
-            bookingStatus: 'pending'
+            bookingStatus: 'pending',
         });
+
         await wallet.save();
         // Save the booking request to the database
         await newBookingRequest.save();
@@ -70,34 +76,33 @@ const createBookingRequest = async (req, res) => {
         if (!ride) {
             return res.status(404).json({ message: 'Ride not found' });
         }
-      
+
         const driverProfile = await Profile.findById(ride.driver._id);
-        if (!driverProfile || !driverProfile.fcmToken) {
-            return res.status(404).json({ message: 'Driver or FCM token not found' });
+
+        if (!driverProfile) {
+            return res.status(404).json({ message: 'Driver not found' });
         }
-       
+
         // Send notification to the driver using their FCM token
-       
         await sendNotification({
             token: driverProfile.fcmToken,
             title: 'New Booking Request',
             body: `You have a new booking request from ${pickupName} to ${dropoffName}.`,
             actions: [
-                { action: 'accept', title: 'Accept'  },
-                { action: 'reject', title: 'Reject'  }
+                { action: 'accept', title: 'Accept' },
+                { action: 'reject', title: 'Reject' }
             ],
-            navigation : "MyRidesScreen",
+            navigation: "MyRidesScreen",
             userId: driverProfile._id,  // Use the driver's profile ID
         });
 
         // Send notification to the user that their request was placed successfully
-        const userToken = 'user-device-token'; // Replace with actual user token from user profile
         await sendNotification({
             token: user.fcmToken,
             title: 'Request Placed Successfully',
             body: `Your booking request from ${pickupName} to ${dropoffName} has been placed successfully.`,
             navigation: "Home",
-            userId:userProfile ,  // Pass the user ID
+            userId: userProfile,  // Pass the user ID
         });
 
         // Return success response

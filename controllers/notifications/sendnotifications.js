@@ -9,7 +9,7 @@ const sendNotification = async ({ token, userId, title, body, actions, navigatio
       userId: userId,
       title: title || '',
       body: body || '',
-      data: { navigationId: navigation || '' }, 
+      data: { navigationId: navigation || '' }, // Fixed issue here
       actions: actions || []
     });
     await notification.save();

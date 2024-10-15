@@ -2,10 +2,8 @@ const Ride = require('../../models/RideOffer');
 const geolib = require('geolib'); // Ensure geolib is imported
 
 const getAllRides = async (req, res) => {
-    console.log('getAllRides controller called', req.body);
     try {
         const { pickupDate, sourcePoint, destinationPoint, seatsBooked, femaleOnly } = req.body;
-
         let rides = await Ride.find({}).populate('driver');
 
         const isWithinRadius = (point1, point2, radius = 20000) => {
@@ -24,9 +22,10 @@ const getAllRides = async (req, res) => {
         const addMinutesToTime = (time, minutesToAdd) => {
             const [hours, minutes] = time.split(':').map(t => parseInt(t, 10));
             const totalMinutes = hours * 60 + minutes + minutesToAdd;
-            const newHours = Math.floor(totalMinutes / 60);
+            const newHours = (Math.floor(totalMinutes / 60) + 12) % 24; // 12-hour format conversion
             const newMinutes = totalMinutes % 60;
-            return `${newHours.toString().padStart(2, '0')}:${newMinutes.toString().padStart(2, '0')} PM`;
+            const period = newHours >= 12 ? 'PM' : 'AM';
+            return `${newHours % 12 || 12}:${newMinutes.toString().padStart(2, '0')} ${period}`;
         };
 
         if (pickupDate) {
@@ -129,7 +128,7 @@ const getAllRides = async (req, res) => {
 
             if (ride.start && ride.end) {
                 if (ride.start.name === ride.sourceName) {
-                    startTime = rideTime;
+                    startTime = rideTime; // Original ride time
                 } else {
                     const durationToStop = calculateDuration(ride.sourcePoint, ride.addStopPoint);
                     startTime = addMinutesToTime(rideTime, durationToStop);
@@ -137,10 +136,10 @@ const getAllRides = async (req, res) => {
 
                 if (ride.end.name === ride.destinationName) {
                     const tripDuration = parseInt(ride.tripDuration.split(' ')[0]);
-                    endTime = addMinutesToTime(rideTime, tripDuration);
+                    endTime = addMinutesToTime(startTime, tripDuration);
                 } else {
-                    const durationToStop = calculateDuration(ride.sourcePoint, ride.addStopPoint);
-                    endTime = addMinutesToTime(rideTime, durationToStop);
+                    const durationToStop = calculateDuration(ride.destinationPoint, ride.addStopPoint);
+                    endTime = addMinutesToTime(startTime, durationToStop);
                 }
 
                 finalDuration = calculateDuration(ride.start.coordinates, ride.end.coordinates);
@@ -156,12 +155,12 @@ const getAllRides = async (req, res) => {
             };
         });
 
-        console.log('Filtered rides:', response);
         res.status(200).json(response);
     } catch (error) {
         console.error('Error retrieving rides:', error);
         res.status(500).json({ message: 'Failed to retrieve rides', error: error.message });
     }
 };
+
 
 module.exports = { getAllRides };

@@ -10,6 +10,9 @@ const RideSchema = new mongoose.Schema({
     sourceName: {
         type: String,
         required: true
+    },time:{
+        type: String,
+        required: true
     },
     sourcePoint: {
         latitude: {
@@ -67,7 +70,7 @@ const RideSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    pickupDate: {
+    date: {
         type: String,
         required: true
     },
@@ -75,6 +78,9 @@ const RideSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    
+    seatsOffered:{  type: String,
+    required: true},
     pricePerSeat: {
         type: String,
         required: true
@@ -100,6 +106,9 @@ const RideSchema = new mongoose.Schema({
         }
     },
     femaleOnly: {
+        type: Boolean,
+        default: false
+    }, gender: {
         type: Boolean,
         default: false
     },

@@ -4,6 +4,7 @@ const authenticateToken = require('../middleware/authenticateToken');
 
 // Import individual controllers
 const getWalletDetails = require('../controllers/wallet/getWalletDetails');
+const {addAmountToWallet}=require('../controllers/wallet/phonepeRecharge');
 const updateBalance = require('../controllers/wallet/updateBalance');
 const addRewardsPoints = require('../controllers/wallet/addRewardsPoints');
 const updateCarbonEmissionPoints = require('../controllers/wallet/updateCarbonEmissionPoints');
@@ -14,7 +15,7 @@ router.get('/:userId', authenticateToken, getWalletDetails);  // Route to get wa
 router.put('/balance/:userId', authenticateToken, updateBalance);  // Route to update balance for a user
 router.put('/rewards/:userId', authenticateToken, addRewardsPoints);  // Route to add rewards points for a user
 router.put('/carbon/:userId', authenticateToken, updateCarbonEmissionPoints);  // Route to update carbon emission points
-
+router.post('/phonepeRecharge', addAmountToWallet);
 router.post('/createOrder', createOrder);
 
 // Route to verify a payment

@@ -15,6 +15,7 @@ const ImageSchema = new mongoose.Schema({
     },
     filePath: {
         type: String,
+        
         required: true
     },
     url: {

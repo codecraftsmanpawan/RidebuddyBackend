@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const feedbackPostSchema = new mongoose.Schema({
-    user: {
+    profile: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Profile',
         required: true
@@ -9,9 +9,9 @@ const feedbackPostSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    image: {
+    image: [{
         type: String
-    },
+    }],
     likes: [
         {
             type: mongoose.Schema.Types.ObjectId,
@@ -25,7 +25,16 @@ const feedbackPostSchema = new mongoose.Schema({
     totalLikes: {
         type: Number,
         default: 0
-    }
+    },
+    report: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Report'
+        }
+    ]
 });
-
+feedbackPostSchema.pre('save', function (next) {
+    this.totalLikes = this.likes.length;
+    next();
+});
 module.exports = mongoose.model('FeedbackPost', feedbackPostSchema);

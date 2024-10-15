@@ -26,7 +26,10 @@ const sosSchema = new Schema({
         type: Date,
         default: Date.now,
         required: true,
-    },
+    },code:{
+        type:String,
+        required:true
+    }
 });
 
 module.exports = mongoose.model('SOS', sosSchema);

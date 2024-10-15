@@ -2,6 +2,7 @@ const Notification = require('../../models/notifications');
 
 const getUserNotifications = async (req, res) => {
   const { userId } = req.params;
+  console.log(userId);
 
   try {
     // Find notifications for the user

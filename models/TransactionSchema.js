@@ -21,17 +21,13 @@ const TransactionSchema = new mongoose.Schema({
         enum: ['credit', 'debit'],
         required: true
     },
-    orderId: {
-        type: String,
-        required: true
-    },
     paymentId: {
         type: String,
         required: true
     },
     status: { // e.g., 'success' or 'failure'
         type: String,
-        enum: ['success', 'failure'],
+        enum: ['SUCCESS', 'FAILURE'],
         required: true
     },
     createdAt: {

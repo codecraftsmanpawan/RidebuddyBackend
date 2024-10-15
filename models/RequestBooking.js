@@ -51,16 +51,26 @@ const RequestBookingSchema = new Schema({
   createdAt: {
     type: Date,
     default: Date.now,
-  } , paymentStatus: {
+  },
+  paymentStatus: {
     type: String,
     enum: ['pending', 'completed', 'failed'],
     default: 'pending'
-},
-bookingStatus: {
+  },
+  bookingStatus: {
     type: String,
     enum: ['confirmed', 'cancelled', 'completed', 'pending'],
     default: 'pending'
-},
+  },
+  startTime: {          // New field
+    type: String,       // Adjust type if necessary (e.g., Date)
+    required: true,
+  },
+  endTime: {            // New field
+    type: String,       // Adjust type if necessary (e.g., Date)
+    required: true,
+  },
+  
 });
 
 const RequestBooking = mongoose.model('RequestBooking', RequestBookingSchema);
